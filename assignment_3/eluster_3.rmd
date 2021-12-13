@@ -7,7 +7,7 @@ output:
   html_document: default
   word_document: default
 ---
-```{r}
+```{r, warning=FALSE}
 # The following code is the setup for python in RStudio
 library(reticulate)
 use_condaenv('r-reticulate')
@@ -276,7 +276,45 @@ I am unsure of why the embedding model would perform worse or the pre-trained mo
 perform better. It's possible it was because of the only data set I was able to find
 only included "test" data sets.
 
+```{r}
+model_simple <- keras_model_sequential() %>%
+  layer_embedding(input_dim = max_features, output_dim = 32) %>%
+  layer_simple_rnn(units = 32) %>%
+  layer_dense(units = 1, activation = "sigmoid")
+model_simple %>% compile(
+  optimizer = "rmsprop",
+  loss = "binary_crossentropy",
+  metrics = c("acc")
+)
+simple_rnn <- model_simple %>% fit(
+  x_train, y_train,
+  epochs = 20,
+  batch_size = 32,
+  validation_split = 0.2
+)
+plot(simple_rnn)
+```
+A simple RNN model does not offer significant improvement, with a final validation accuracy of 70%.
 
+```{r}
+model_lstm <- keras_model_sequential() %>%
+  layer_embedding(input_dim = max_features, output_dim = 32) %>%
+  layer_lstm(units = 32) %>%
+  layer_dense(units = 1, activation = "sigmoid")
+model_lstm %>% compile(
+  optimizer = "rmsprop",
+  loss = "binary_crossentropy",
+  metrics = c("acc")
+)
+lstm_model <- model_lstm %>% fit(
+  x_train, y_train,
+  epochs = 20,
+  batch_size = 32,
+  validation_split = 0.2
+)
+plot(lstm_model)
+```
+A LSTM layer does offer improvement, with accuaracy increasing to 77%.
 
 
 
